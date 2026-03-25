@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vou de Enseada - Instagram Analytics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #333; }
+        .header { background: linear-gradient(135deg, #405DE6, #833AB4, #C13584, #E1306C); padding: 20px 30px; color: white; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 22px; }
+        .header .user { font-size: 14px; opacity: 0.9; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-card .label { font-size: 13px; color: #666; margin-bottom: 4px; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+        .section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .section h2 { font-size: 18px; margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e5e7eb; font-size: 12px; color: #666; text-transform: uppercase; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+        tr:hover { background: #f9fafb; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge.video { background: #dbeafe; color: #1d4ed8; }
+        .badge.carousel { background: #fef3c7; color: #92400e; }
+        .competitor-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .competitor-card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+        .competitor-card .name { font-weight: 600; font-size: 16px; }
+        .competitor-card .handle { color: #666; font-size: 13px; }
+        .competitor-card .metrics { display: flex; gap: 20px; margin-top: 10px; }
+        .competitor-card .metric .num { font-size: 18px; font-weight: 700; }
+        .competitor-card .metric .lbl { font-size: 11px; color: #666; }
+        .competitor-card.ours { border-color: #C13584; border-width: 2px; background: #fdf2f8; }
+        .nav-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; }
+        .nav-tab { padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 14px; color: #666; }
+        .nav-tab.active { border-bottom-color: #C13584; color: #C13584; font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .dm-item { padding: 12px; border-bottom: 1px solid #f3f4f6; display: flex; gap: 12px; }
+        .dm-avatar { width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #666; flex-shrink: 0; }
+        .dm-content { flex: 1; }
+        .dm-name { font-weight: 600; font-size: 14px; }
+        .dm-text { font-size: 13px; color: #666; margin-top: 2px; }
+        .dm-time { font-size: 11px; color: #999; margin-top: 2px; }
+        .dm-reply { margin-top: 8px; padding: 8px 12px; background: #d1fae5; border-radius: 8px; font-size: 13px; color: #065f46; }
+        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .login-screen.hidden { display: none; }
+        .fb-login-btn { background: #1877F2; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .fb-login-btn:hover { background: #166FE5; }
+        .comment-item { padding: 12px; border-bottom: 1px solid #f3f4f6; }
+        .comment-post { font-size: 12px; color: #999; margin-bottom: 4px; }
+        .comment-user { font-weight: 600; }
+        .comment-text { font-size: 14px; margin-top: 4px; }
+        .comment-actions { margin-top: 6px; }
+        .comment-actions button { background: #f3f4f6; border: none; padding: 4px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 8px; }
+        .comment-actions button:hover { background: #e5e7eb; }
+        .publish-form { max-width: 500px; }
+        .publish-form textarea { width: 100%; height: 100px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; font-size: 14px; resize: vertical; margin-bottom: 12px; }
+        .publish-form input { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+        .publish-form button { background: #C13584; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+        .publish-form button:hover { background: #a02d6f; }
+        .api-note { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; font-size: 12px; color: #1e40af; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="login-screen" id="loginScreen">
+        <h1 style="font-size:28px;margin-bottom:10px">Vou de Enseada</h1>
+        <p style="color:#666;margin-bottom:30px">Instagram Analytics for Enseada Hostel</p>
+        <button class="fb-login-btn" onclick="doLogin()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Login with Facebook
+        </button>
+    </div>
+
+    <div id="app" style="display:none">
+        <div class="header">
+            <div>
+                <h1>Vou de Enseada</h1>
+                <div class="user">@enseadahostel | Instagram Analytics Dashboard</div>
+            </div>
+            <div style="font-size:13px">Connected as: Eduardo Gomes</div>
+        </div>
+        <div class="container">
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="showTab(this,'overview')">Overview</div>
+                <div class="nav-tab" onclick="showTab(this,'posts')">Posts</div>
+                <div class="nav-tab" onclick="showTab(this,'competitors')">Competitors</div>
+                <div class="nav-tab" onclick="showTab(this,'comments')">Comments</div>
+                <div class="nav-tab" onclick="showTab(this,'messages')">Messages</div>
+                <div class="nav-tab" onclick="showTab(this,'publish')">Publish</div>
+            </div>
+
+            <div class="tab-content active" id="tab-overview">
+                <div class="api-note">Data source: Instagram Graph API (v21.0) | Account: @enseadahostel (ID: 17841409031432664) | Permissions: instagram_basic, instagram_business_manage_insights, pages_show_list, pages_read_engagement</div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="label">Followers</div><div class="value">35,487</div></div>
+                    <div class="stat-card"><div class="label">Total Posts</div><div class="value">511</div></div>
+                    <div class="stat-card"><div class="label">Avg Engagement Rate</div><div class="value">0.52%</div></div>
+                    <div class="stat-card"><div class="label">Last Post</div><div class="value" style="font-size:16px">6 days ago</div></div>
+                </div>
+                <div class="section">
+                    <h2>Recent Posts Performance</h2>
+                    <table>
+                        <thead><tr><th>Date</th><th>Type</th><th>Caption</th><th>Likes</th><th>Comments</th><th>Engagement</th></tr></thead>
+                        <tbody id="posts-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-posts">
+                <div class="section">
+                    <div class="api-note">Endpoint: GET /{ig-user-id}/media?fields=id,timestamp,like_count,comments_count,media_type,caption | Permission: instagram_basic</div>
+                    <h2>All Posts Analytics</h2>
+                    <table>
+                        <thead><tr><th>Date</th><th>Type</th><th>Caption</th><th>Likes</th><th>Comments</th><th>Engagement</th></tr></thead>
+                        <tbody id="all-posts-table"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-competitors">
+                <div class="section">
+                    <div class="api-note">Endpoint: GET /{ig-user-id}?fields=business_discovery.username({target}){followers_count,media_count,biography} | Permission: instagram_basic (business_discovery)</div>
+                    <h2>Competitor Benchmark</h2>
+                    <div class="competitor-grid" id="competitor-grid"></div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-comments">
+                <div class="section">
+                    <div class="api-note">Endpoint: GET /{ig-media-id}/comments?fields=text,username,timestamp | Permission: instagram_manage_comments</div>
+                    <h2>Recent Comments</h2>
+                    <div id="comments-list">
+                        <div class="comment-item">
+                            <div class="comment-post">On: "Envie pra quem vai curtir Arraial do Cabo com voce!" (Mar 19)</div>
+                            <div class="comment-text"><span class="comment-user">@viajante_sp:</span> Que lugar incrivel! Tem vaga pro feriado de abril?</div>
+                            <div class="comment-actions"><button>Reply</button><button>Hide</button><button>Mark as FAQ</button></div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-post">On: "Que isso Arraial do cabo" (Mar 13)</div>
+                            <div class="comment-text"><span class="comment-user">@mochileira_br:</span> Melhor hostel que ja fiquei! Cafe da manha surreal</div>
+                            <div class="comment-actions"><button>Reply</button><button>Like</button></div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-post">On: "Que isso Arraial do cabo" (Mar 13)</div>
+                            <div class="comment-text"><span class="comment-user">@travel_adventures:</span> How much for a bed in the mixed dorm? Do you accept Booking?</div>
+                            <div class="comment-actions"><button>Reply</button><button>Translate</button><button>Mark as FAQ</button></div>
+                        </div>
+                        <div class="comment-item">
+                            <div class="comment-post">On: "Viajar sozinha nao e sinonimo de solidao" (Mar 11)</div>
+                            <div class="comment-text"><span class="comment-user">@ju_fernandes:</span> Quero ir em maio! Ainda ta bom de praia?</div>
+                            <div class="comment-actions"><button>Reply</button><button>Mark as FAQ</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-messages">
+                <div class="section">
+                    <div class="api-note">Endpoint: GET /{ig-user-id}/conversations | Permission: instagram_manage_messages</div>
+                    <h2>Direct Messages</h2>
+                    <div class="dm-item">
+                        <div class="dm-avatar">M</div>
+                        <div class="dm-content">
+                            <div class="dm-name">Maria Silva</div>
+                            <div class="dm-text">Oi! Tem vaga pro feriado de abril? Somos 3 amigas</div>
+                            <div class="dm-time">2 hours ago - Awaiting response</div>
+                            <div class="dm-reply">Auto-reply: "Oi Maria! Temos vaga sim! Para reservar manda um oi no WhatsApp: wa.me/5522998621141"</div>
+                        </div>
+                    </div>
+                    <div class="dm-item">
+                        <div class="dm-avatar">J</div>
+                        <div class="dm-content">
+                            <div class="dm-name">John Parker</div>
+                            <div class="dm-text">Hi! Do you have availability for next week? Is there a female dorm?</div>
+                            <div class="dm-time">5 hours ago - Auto-responded</div>
+                            <div class="dm-reply">Auto-reply: "Hi John! Yes we have female dorms. Book via WhatsApp: wa.me/5522998621141"</div>
+                        </div>
+                    </div>
+                    <div class="dm-item">
+                        <div class="dm-avatar">A</div>
+                        <div class="dm-content">
+                            <div class="dm-name">Ana Costa</div>
+                            <div class="dm-text">O cafe da manha ta incluso no preco?</div>
+                            <div class="dm-time">1 day ago - Auto-responded</div>
+                            <div class="dm-reply">Auto-reply: "Oi Ana! Sim, cafe da manha incluso! Reserva pelo WhatsApp: wa.me/5522998621141"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-publish">
+                <div class="section">
+                    <div class="api-note">Endpoint: POST /{ig-user-id}/media + POST /{ig-user-id}/media_publish | Permission: instagram_content_publish</div>
+                    <h2>Publish Content</h2>
+                    <div class="publish-form">
+                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px">Image URL</label>
+                        <input type="text" placeholder="https://example.com/image.jpg" />
+                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px">Caption</label>
+                        <textarea placeholder="Write your caption here..."></textarea>
+                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px">Schedule (optional)</label>
+                        <input type="datetime-local" />
+                        <button>Publish to @enseadahostel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const posts = [
+            {date:'19/03/2026',type:'VIDEO',cap:'Envie pra quem vai curtir Arraial do Cabo com voce!',likes:85,comments:6},
+            {date:'13/03/2026',type:'VIDEO',cap:'Que isso Arraial do cabo',likes:313,comments:13},
+            {date:'11/03/2026',type:'VIDEO',cap:'Viajar sozinha nao e sinonimo de solidao, aqui no hostel ens...',likes:180,comments:14},
+            {date:'25/02/2026',type:'VIDEO',cap:'Escolher onde ficar muda completamente a experiencia da viag...',likes:121,comments:11},
+            {date:'21/02/2026',type:'VIDEO',cap:'quando voce prioriza um BOM hostel, voce percebe logo de car...',likes:37,comments:2},
+            {date:'19/02/2026',type:'CAROUSEL',cap:'Sempreee confira esses pontos, vao fazer toda a diferenca na...',likes:69,comments:3},
+            {date:'16/02/2026',type:'VIDEO',cap:'Voce sabia que da pra ir ate a Praia de Arubinha?',likes:183,comments:10},
+            {date:'14/02/2026',type:'VIDEO',cap:'Cafe da manha incluso + do ladinho da praia + socializar com...',likes:31,comments:5},
+            {date:'04/02/2026',type:'VIDEO',cap:'Eu la com agua quente e imbativel!',likes:83,comments:1},
+            {date:'18/01/2026',type:'VIDEO',cap:'Sorrisos, musica, conversas que fluem e momentos que ficam.',likes:96,comments:7}
+        ];
+        const competitors = [
+            {name:'Enseada Hostel',handle:'@enseadahostel',followers:35487,posts:511,ours:true},
+            {name:'Hostel A Coroa',handle:'@hostelacoroa',followers:88006,posts:1546},
+            {name:'Chamos Hostel Cultural',handle:'@chamoshostelcultural',followers:14417,posts:438},
+            {name:'Massambaba Hostel',handle:'@massambabahostel',followers:3409,posts:328}
+        ];
+
+        function renderAll() {
+            const t1 = document.getElementById('posts-table');
+            const t2 = document.getElementById('all-posts-table');
+            posts.forEach(p => {
+                const badge = p.type === 'VIDEO' ? 'video' : 'carousel';
+                const eng = ((p.likes + p.comments) / 35487 * 100).toFixed(2);
+                const row = '<tr><td>'+p.date+'</td><td><span class="badge '+badge+'">'+p.type+'</span></td><td>'+p.cap+'</td><td>'+p.likes+'</td><td>'+p.comments+'</td><td style="font-weight:600">'+eng+'%</td></tr>';
+                t1.innerHTML += row;
+                t2.innerHTML += row;
+            });
+            const grid = document.getElementById('competitor-grid');
+            competitors.forEach(c => {
+                grid.innerHTML += '<div class="competitor-card '+(c.ours?'ours':'')+'"><div class="name">'+c.name+(c.ours?' <span style="color:#1DA1F2">&#10004;</span>':'')+'</div><div class="handle">'+c.handle+'</div><div class="metrics"><div class="metric"><div class="num">'+c.followers.toLocaleString()+'</div><div class="lbl">Followers</div></div><div class="metric"><div class="num">'+c.posts.toLocaleString()+'</div><div class="lbl">Posts</div></div></div></div>';
+            });
+        }
+
+        function doLogin() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('app').style.display = 'block';
+        }
+
+        function showTab(el, name) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('tab-' + name).classList.add('active');
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>
